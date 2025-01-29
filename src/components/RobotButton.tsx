@@ -67,11 +67,13 @@ const RobotButton = () => {
               highestY = boundingSphere.center.y;
               headRef.current = child;
               // Apply orange color only to the head part
-              child.material = new THREE.MeshStandardMaterial({
-                color: '#F97316',
-                metalness: 0.5,
-                roughness: 0.5,
-              });
+              if (child === headRef.current) {
+                child.material = new THREE.MeshStandardMaterial({
+                  color: '#F97316',
+                  metalness: 0.5,
+                  roughness: 0.5,
+                });
+              }
             }
           }
         });
