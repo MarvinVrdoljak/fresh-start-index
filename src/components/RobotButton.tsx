@@ -25,7 +25,7 @@ const RobotButton = () => {
 
     renderer.setSize(100, 100);
     camera.position.z = 0.8;
-    camera.position.y = 0.3; // Raised camera position more to focus on upper body
+    camera.position.y = 0.6; // Raised camera position to 0.6 to focus more on upper body
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
