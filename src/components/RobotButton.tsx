@@ -15,7 +15,7 @@ const RobotButton = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = null; // Make background transparent
+    scene.background = null;
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -23,9 +23,9 @@ const RobotButton = () => {
       antialias: true
     });
 
-    renderer.setSize(100, 100); // Increased size for better visibility
-    camera.position.z = 3;
-    camera.position.y = 0;
+    renderer.setSize(100, 100);
+    camera.position.z = 1.5; // Moved camera closer
+    camera.position.y = 0.2; // Slightly raised to focus on head
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
@@ -48,13 +48,17 @@ const RobotButton = () => {
         model = gltf.scene;
         
         // Scale and position adjustments
-        model.scale.set(0.03, 0.03, 0.03); // Smaller scale
-        model.position.set(0, -0.5, 0);
+        model.scale.set(0.02, 0.02, 0.02); // Slightly smaller scale
+        model.position.set(0, -0.3, 0); // Raised position
         
         // Center the model using its bounding box
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
+        model.position.y += 0.2; // Adjust vertical position after centering
+        
+        // Set initial rotation to face forward
+        model.rotation.y = Math.PI; // Rotate 180 degrees to face the camera
         
         scene.add(model);
         console.log('Model added to scene');
@@ -77,10 +81,8 @@ const RobotButton = () => {
       requestAnimationFrame(animate);
       
       if (model) {
-        // Rotate the model
-        model.rotation.y += 0.02;
-        // Add subtle bobbing motion
-        model.position.y = -0.5 + Math.sin(Date.now() * 0.002) * 0.05;
+        // Only keep the subtle bobbing motion
+        model.position.y = -0.3 + Math.sin(Date.now() * 0.002) * 0.02;
       }
       
       renderer.render(scene, camera);
