@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 const RobotButton = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -18,51 +21,53 @@ const RobotButton = () => {
     });
 
     renderer.setSize(50, 50);
-    camera.position.z = 5;
+    camera.position.z = 2;
+    camera.position.y = 0.5;
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0x404040);
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(1, 1, 1);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight.position.set(1, 2, 1);
     scene.add(directionalLight);
 
-    // Create robot
-    const robotGroup = new THREE.Group();
+    // Load GLTF model
+    const loader = new GLTFLoader();
+    let model: THREE.Group;
 
-    // Body
-    const bodyGeometry = new THREE.BoxGeometry(1.2, 1.5, 1);
-    const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    robotGroup.add(body);
-
-    // Head
-    const headGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-    const headMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
-    const head = new THREE.Mesh(headGeometry, headMaterial);
-    head.position.y = 1.15;
-    robotGroup.add(head);
-
-    // Eyes
-    const eyeGeometry = new THREE.SphereGeometry(0.1);
-    const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-    
-    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    leftEye.position.set(-0.2, 1.2, 0.4);
-    
-    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    rightEye.position.set(0.2, 1.2, 0.4);
-    
-    robotGroup.add(leftEye);
-    robotGroup.add(rightEye);
-
-    scene.add(robotGroup);
+    loader.load(
+      '/models/scene.gltf',
+      (gltf) => {
+        model = gltf.scene;
+        // Scale down the model
+        model.scale.set(0.4, 0.4, 0.4);
+        // Center the model
+        model.position.set(0, -0.5, 0);
+        scene.add(model);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading model:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load 3D model",
+          variant: "destructive"
+        });
+      }
+    );
 
     // Animation
     const animate = () => {
       requestAnimationFrame(animate);
-      robotGroup.rotation.y += 0.02;
+      
+      if (model) {
+        // Rotate the model
+        model.rotation.y += 0.02;
+        // Add subtle bobbing motion
+        model.position.y = -0.5 + Math.sin(Date.now() * 0.002) * 0.05;
+      }
+      
       renderer.render(scene, camera);
     };
 
@@ -77,10 +82,11 @@ const RobotButton = () => {
 
   return (
     <Button 
-      className="fixed bottom-4 right-4 p-0 w-[50px] h-[50px] rounded-full overflow-hidden"
+      className="fixed bottom-4 right-4 p-0 w-[50px] h-[50px] rounded-full overflow-hidden group"
       variant="outline"
+      title="Model by 3DMaesen on Sketchfab"
     >
-      <canvas ref={canvasRef} />
+      <canvas ref={canvasRef} className="transition-opacity group-hover:opacity-90" />
     </Button>
   );
 };
