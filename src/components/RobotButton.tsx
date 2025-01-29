@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 const RobotButton = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
+  const modelRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -24,7 +25,7 @@ const RobotButton = () => {
 
     renderer.setSize(100, 100);
     camera.position.z = 0.8;
-    camera.position.y = 0.7; // Raised camera position to 0.7 to focus more on upper body
+    camera.position.y = 0.7;
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
@@ -36,7 +37,6 @@ const RobotButton = () => {
 
     // Load GLTF model
     const loader = new GLTFLoader();
-    let model: THREE.Group;
 
     console.log('Loading model from:', '/models/international_model_toys/scene.gltf');
 
@@ -44,7 +44,8 @@ const RobotButton = () => {
       '/models/international_model_toys/scene.gltf',
       (gltf) => {
         console.log('Model loaded successfully');
-        model = gltf.scene;
+        const model = gltf.scene;
+        modelRef.current = model;
         
         // Scale and position adjustments
         model.scale.set(0.015, 0.015, 0.015);
@@ -90,13 +91,37 @@ const RobotButton = () => {
       }
     );
 
+    // Mouse movement handler
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!modelRef.current) return;
+
+      // Get the button's position and dimensions
+      const buttonRect = canvasRef.current?.getBoundingClientRect();
+      if (!buttonRect) return;
+
+      // Calculate mouse position relative to the button center
+      const mouseX = ((event.clientX - buttonRect.left) / buttonRect.width) * 2 - 1;
+      const mouseY = -((event.clientY - buttonRect.top) / buttonRect.height) * 2 + 1;
+
+      // Calculate target rotation (limit the rotation range)
+      const targetRotationX = mouseY * 0.3; // Vertical rotation
+      const targetRotationY = mouseX * 0.3; // Horizontal rotation
+
+      // Apply rotation to the model's head
+      modelRef.current.rotation.x = targetRotationX;
+      modelRef.current.rotation.y = targetRotationY;
+    };
+
+    // Add mouse move event listener
+    window.addEventListener('mousemove', handleMouseMove);
+
     // Animation
     const animate = () => {
       requestAnimationFrame(animate);
       
-      if (model) {
+      if (modelRef.current) {
         // Only keep the subtle bobbing motion
-        model.position.y = -0.15 + Math.sin(Date.now() * 0.002) * 0.01;
+        modelRef.current.position.y = -0.15 + Math.sin(Date.now() * 0.002) * 0.01;
       }
       
       renderer.render(scene, camera);
@@ -107,6 +132,7 @@ const RobotButton = () => {
     // Cleanup
     return () => {
       console.log('Cleaning up scene');
+      window.removeEventListener('mousemove', handleMouseMove);
       scene.clear();
       renderer.dispose();
     };
