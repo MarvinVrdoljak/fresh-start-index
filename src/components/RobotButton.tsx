@@ -15,17 +15,16 @@ const RobotButton = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = null;
+    scene.background = new THREE.Color('#1A1F2C'); // Dark background
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
-      alpha: true,
       antialias: true
     });
 
     renderer.setSize(100, 100);
     camera.position.z = 0.8;
-    camera.position.y = 0.6; // Raised camera position to 0.6 to focus more on upper body
+    camera.position.y = 0.7; // Raised camera position to 0.7 to focus more on upper body
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
@@ -59,6 +58,17 @@ const RobotButton = () => {
         
         // Set initial rotation to face forward
         model.rotation.y = 0;
+
+        // Apply orange color to the model
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.material = new THREE.MeshStandardMaterial({
+              color: '#F97316', // Bright orange color
+              metalness: 0.5,
+              roughness: 0.5,
+            });
+          }
+        });
         
         scene.add(model);
         console.log('Model added to scene');
@@ -100,7 +110,7 @@ const RobotButton = () => {
 
   return (
     <Button 
-      className="fixed bottom-4 right-4 p-0 w-[100px] h-[100px] rounded-full overflow-hidden group bg-transparent hover:bg-transparent"
+      className="fixed bottom-4 right-4 p-0 w-[100px] h-[100px] rounded-full overflow-hidden group bg-[#1A1F2C] hover:bg-[#1A1F2C]/90"
       variant="outline"
       title="Int'l Model Toys - 3D Model"
     >
