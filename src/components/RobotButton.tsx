@@ -11,8 +11,11 @@ const RobotButton = () => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    console.log('Initializing 3D scene');
+
     // Scene setup
     const scene = new THREE.Scene();
+    scene.background = null; // Make background transparent
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -20,15 +23,15 @@ const RobotButton = () => {
       antialias: true
     });
 
-    renderer.setSize(50, 50);
-    camera.position.z = 2;
-    camera.position.y = 0.5;
+    renderer.setSize(100, 100); // Increased size for better visibility
+    camera.position.z = 3;
+    camera.position.y = 0;
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0x404040, 2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
     
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
     directionalLight.position.set(1, 2, 1);
     scene.add(directionalLight);
 
@@ -36,16 +39,25 @@ const RobotButton = () => {
     const loader = new GLTFLoader();
     let model: THREE.Group;
 
-    // Load the model from the correct path
+    console.log('Loading model from:', '/models/international_model_toys/scene.gltf');
+
     loader.load(
       '/models/international_model_toys/scene.gltf',
       (gltf) => {
+        console.log('Model loaded successfully');
         model = gltf.scene;
-        // Scale down the model
-        model.scale.set(0.4, 0.4, 0.4);
-        // Center the model
+        
+        // Scale and position adjustments
+        model.scale.set(0.03, 0.03, 0.03); // Smaller scale
         model.position.set(0, -0.5, 0);
+        
+        // Center the model using its bounding box
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+        
         scene.add(model);
+        console.log('Model added to scene');
       },
       (progress) => {
         console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
@@ -78,6 +90,7 @@ const RobotButton = () => {
 
     // Cleanup
     return () => {
+      console.log('Cleaning up scene');
       scene.clear();
       renderer.dispose();
     };
@@ -85,7 +98,7 @@ const RobotButton = () => {
 
   return (
     <Button 
-      className="fixed bottom-4 right-4 p-0 w-[50px] h-[50px] rounded-full overflow-hidden group"
+      className="fixed bottom-4 right-4 p-0 w-[100px] h-[100px] rounded-full overflow-hidden group bg-transparent hover:bg-transparent"
       variant="outline"
       title="Int'l Model Toys - 3D Model"
     >
