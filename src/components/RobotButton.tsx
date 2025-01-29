@@ -66,11 +66,7 @@ const RobotButton = () => {
             if (boundingSphere && boundingSphere.center.y > highestY) {
               highestY = boundingSphere.center.y;
               headRef.current = child;
-            }
-
-            // Apply orange color to non-eye parts
-            const isEyes = child.geometry.boundingSphere?.center.y > 40;
-            if (!isEyes) {
+              // Apply orange color only to the head part
               child.material = new THREE.MeshStandardMaterial({
                 color: '#F97316',
                 metalness: 0.5,
