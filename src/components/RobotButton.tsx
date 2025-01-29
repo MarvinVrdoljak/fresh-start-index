@@ -8,6 +8,7 @@ const RobotButton = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
   const modelRef = useRef<THREE.Group | null>(null);
+  const headRef = useRef<THREE.Object3D | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -16,7 +17,7 @@ const RobotButton = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#1A1F2C'); // Dark background
+    scene.background = new THREE.Color('#1A1F2C');
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -57,17 +58,21 @@ const RobotButton = () => {
         model.position.sub(center);
         model.position.y += 0.1;
         
-        // Set initial rotation to face forward
-        model.rotation.y = 0;
-
-        // Apply orange color to the model except for eyes
+        // Find the head part (assuming it's the highest part in the model)
+        let highestY = -Infinity;
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            // Check if this mesh is part of the eyes (based on position)
-            const isEyes = child.geometry.boundingSphere?.center.y > 40; // Eyes are positioned higher in the model
+            const boundingSphere = child.geometry.boundingSphere;
+            if (boundingSphere && boundingSphere.center.y > highestY) {
+              highestY = boundingSphere.center.y;
+              headRef.current = child;
+            }
+
+            // Apply orange color to non-eye parts
+            const isEyes = child.geometry.boundingSphere?.center.y > 40;
             if (!isEyes) {
               child.material = new THREE.MeshStandardMaterial({
-                color: '#F97316', // Bright orange color
+                color: '#F97316',
                 metalness: 0.5,
                 roughness: 0.5,
               });
@@ -93,26 +98,22 @@ const RobotButton = () => {
 
     // Mouse movement handler
     const handleMouseMove = (event: MouseEvent) => {
-      if (!modelRef.current) return;
+      if (!headRef.current) return;
 
-      // Get the button's position and dimensions
       const buttonRect = canvasRef.current?.getBoundingClientRect();
       if (!buttonRect) return;
 
-      // Calculate mouse position relative to the button center
       const mouseX = ((event.clientX - buttonRect.left) / buttonRect.width) * 2 - 1;
       const mouseY = -((event.clientY - buttonRect.top) / buttonRect.height) * 2 + 1;
 
-      // Calculate target rotation (limit the rotation range)
-      const targetRotationX = mouseY * 0.3; // Vertical rotation
-      const targetRotationY = mouseX * 0.3; // Horizontal rotation
+      // Apply rotation only to the head
+      const targetRotationX = mouseY * 0.3;
+      const targetRotationY = mouseX * 0.3;
 
-      // Apply rotation to the model's head
-      modelRef.current.rotation.x = targetRotationX;
-      modelRef.current.rotation.y = targetRotationY;
+      headRef.current.rotation.x = targetRotationX;
+      headRef.current.rotation.y = targetRotationY;
     };
 
-    // Add mouse move event listener
     window.addEventListener('mousemove', handleMouseMove);
 
     // Animation
