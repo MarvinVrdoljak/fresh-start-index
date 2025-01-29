@@ -24,8 +24,8 @@ const RobotButton = () => {
     });
 
     renderer.setSize(100, 100);
-    camera.position.z = 0.8; // Moved camera much closer
-    camera.position.y = 0.1; // Slightly raised to focus on head
+    camera.position.z = 0.8;
+    camera.position.y = 0.3; // Raised camera position more to focus on upper body
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
@@ -48,17 +48,17 @@ const RobotButton = () => {
         model = gltf.scene;
         
         // Scale and position adjustments
-        model.scale.set(0.015, 0.015, 0.015); // Even smaller scale
-        model.position.set(0, -0.15, 0); // Raised position
+        model.scale.set(0.015, 0.015, 0.015);
+        model.position.set(0, -0.15, 0);
         
         // Center the model using its bounding box
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
-        model.position.y += 0.1; // Adjust vertical position after centering
+        model.position.y += 0.1;
         
         // Set initial rotation to face forward
-        model.rotation.y = 0; // No rotation needed now
+        model.rotation.y = 0;
         
         scene.add(model);
         console.log('Model added to scene');
