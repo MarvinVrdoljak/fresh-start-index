@@ -59,14 +59,18 @@ const RobotButton = () => {
         // Set initial rotation to face forward
         model.rotation.y = 0;
 
-        // Apply orange color to the model
+        // Apply orange color to the model except for eyes
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            child.material = new THREE.MeshStandardMaterial({
-              color: '#F97316', // Bright orange color
-              metalness: 0.5,
-              roughness: 0.5,
-            });
+            // Check if this mesh is part of the eyes (based on position)
+            const isEyes = child.geometry.boundingSphere?.center.y > 40; // Eyes are positioned higher in the model
+            if (!isEyes) {
+              child.material = new THREE.MeshStandardMaterial({
+                color: '#F97316', // Bright orange color
+                metalness: 0.5,
+                roughness: 0.5,
+              });
+            }
           }
         });
         
