@@ -36,8 +36,9 @@ const RobotButton = () => {
     const loader = new GLTFLoader();
     let model: THREE.Group;
 
+    // Load the model from the correct path
     loader.load(
-      '/models/scene.gltf',
+      '/models/international_model_toys/scene.gltf',
       (gltf) => {
         model = gltf.scene;
         // Scale down the model
@@ -46,7 +47,9 @@ const RobotButton = () => {
         model.position.set(0, -0.5, 0);
         scene.add(model);
       },
-      undefined,
+      (progress) => {
+        console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+      },
       (error) => {
         console.error('Error loading model:', error);
         toast({
@@ -84,7 +87,7 @@ const RobotButton = () => {
     <Button 
       className="fixed bottom-4 right-4 p-0 w-[50px] h-[50px] rounded-full overflow-hidden group"
       variant="outline"
-      title="Model by 3DMaesen on Sketchfab"
+      title="Int'l Model Toys - 3D Model"
     >
       <canvas ref={canvasRef} className="transition-opacity group-hover:opacity-90" />
     </Button>
